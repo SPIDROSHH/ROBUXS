@@ -1,0 +1,95 @@
+local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/YarhmReborn/RobloxScripts/refs/heads/main/Lib.lua"))()
+local One = library:Window("Robux Stealerr | V2")
+
+local targetPlayerName = ""
+local amount = ""
+
+-- Function to format numbers with commas
+local function formatNumber(number)
+    local formatted = tostring(number)
+    formatted = formatted:reverse():gsub("(%d%d%d)", "%1,"):reverse()
+    if formatted:sub(1, 1) == "," then
+        formatted = formatted:sub(2)
+    end
+    return formatted
+end
+
+-- Function to teleport to a player
+local function teleportToPlayer()
+    local targetPlayer = game:GetService("Players"):FindFirstChild(targetPlayerName)
+    if targetPlayer then
+        local targetCharacter = targetPlayer.Character
+        if targetCharacter and targetCharacter:FindFirstChild("HumanoidRootPart") then
+            local targetPosition = targetCharacter.HumanoidRootPart.Position
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(targetPosition)
+            print("Teleporting to " .. targetPlayerName)
+        else
+            print("Target player doesn't have a valid character!")
+        end
+    else
+        print("Player not found!")
+    end
+end
+
+-- Function to perform the donation popup effect
+local function performDonationPopup(username, robux_amount)
+    local ScreenGui = game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui
+    local TweenService = game:GetService("TweenService")
+    local Donation_Text = username.." DONATED " .. formatNumber(robux_amount) .. " TO YOU!"
+    local clone = game:GetService("Players").LocalPlayer.PlayerGui.UITemplates.donationPopup:Clone()
+
+    -- Increase the raised value (make sure this part makes sense in your game)
+    game:GetService("Players").LocalPlayer.leaderstats.Raised.Value = game:GetService("Players").LocalPlayer.leaderstats.Raised.Value + robux_amount
+    clone.Message.Text = Donation_Text
+    clone.Transparency = 1
+    clone.UIScale.Scale = 0
+    clone.Parent = ScreenGui.Popups
+
+    -- Play sound effect based on donation level
+    local sound = nil
+    if robux_amount <= 100 then
+        sound = game:GetService("SoundService").SFX.DonationLevels.DonationLevel3
+    elseif robux_amount <= 1000 then
+        sound = game:GetService("SoundService").SFX.DonationLevels.DonationLevel3
+    else
+        sound = game:GetService("SoundService").SFX.DonationLevels.DonationLevel3
+    end
+
+    if sound then
+        sound:Play()
+    end
+
+    -- Tween animation for the popup
+    TweenService:Create(clone, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
+    local Back = Enum.EasingStyle.Back
+    if not Back then
+        Back = Enum.EasingStyle.Quint
+    end
+    TweenService:Create(clone.UIScale, TweenInfo.new(0.3, Back), {Scale = 1}):Play()
+    TweenService:Create(clone.Message, TweenInfo.new(1, Enum.EasingStyle.Quint), {MaxVisibleGraphemes = #Donation_Text}):Play()
+    wait(4)
+    TweenService:Create(clone, TweenInfo.new(0.25, Enum.EasingStyle.Quint), {Transparency = 1}):Play()
+    TweenService:Create(clone.UIScale, TweenInfo.new(0.5, Back), {Scale = 0}):Play()
+    wait(0.5)
+end
+
+-- Credits Script Label!
+One:Box("User =", "Type Here!", function(inputText)
+    targetPlayerName = inputText
+end)
+
+One:Box("Amount =", "Type Here!", function(inputText)
+    amount = tonumber(inputText) -- Ensure that the amount is a number
+end)
+
+One:Button("Teleport To Player", function()
+    teleportToPlayer()
+end)
+
+One:Button("Steal Robux", function()
+    if targetPlayerName ~= "" and amount then
+        performDonationPopup(targetPlayerName, amount)
+    else
+        print("Please enter both a username and an amount.")
+    end
+end)
